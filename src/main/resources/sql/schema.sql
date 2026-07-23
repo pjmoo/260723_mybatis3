@@ -1,9 +1,20 @@
-CREATE TABLE IF NOT EXISTS STUDENTS (
-                                        id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                        name VARCHAR(50) NOT NULL
-    );
+CREATE TABLE IF NOT EXISTS STUDENTS
+(
+    id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+);
 
-CREATE TABLE IF NOT EXISTS COURSES (
-                                       id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                       name VARCHAR(100) NOT NULL
-    );
+CREATE TABLE IF NOT EXISTS COURSES
+(
+    id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ENROLLMENTS
+(
+    student_id BIGINT NOT NULL,
+    course_id  BIGINT NOT NULL,
+    PRIMARY KEY (student_id, course_id),
+    CONSTRAINT fk_enrollments_student FOREIGN KEY (student_id) REFERENCES STUDENTS (id),
+    CONSTRAINT fk_enrollments_course FOREIGN KEY (course_id) REFERENCES COURSES (id)
+);

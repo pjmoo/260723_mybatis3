@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mybatis3.mapper.EnrollMapper">
+    <insert id="insertStudent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO STUDENTS
+        (name)
+        VALUES
+        (#{name})
+    </insert>
+    <insert id="insertCourse" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO COURSES
+        (name)
+        VALUES
+        (#{name})
+    </insert>
+    <select id="findAllStudents" resultType="org.example.mybatis3.entity.Student">
+        SELECT * FROM STUDENTS
+    </select>
+    <select id="findAllCourses" resultType="org.example.mybatis3.entity.Course">
+        SELECT * FROM COURSES
+    </select>
+    <!--  step2  -->
+    <insert id="insertEnrollment">
+        INSERT INTO ENROLLMENTS
+        (student_id, course_id)
+        VALUES
+        (#{student.id}, #{course.id})
+    </insert>
+    <resultMap id="studentWithCoursesResultMap" type="org.example.mybatis3.dto.StudentWithCoursesDTO">
+        <id property="id" column="student_id"/>
+        <result property="name" column="student_name"/>
+        <collection property="courses" ofType="org.example.mybatis3.entity.Course">
+            <id property="id" column="course_id"/>
+            <result property="name" column="course_name"/>
+        </collection>
+        <!--    Nested Select -> 특정한 PK/FK로 select한 결과물을 collection에 넣어주는 기능 => N+1 (비효율적이라 이런게 있다는 것만 아시면 됨)    -->
+        <!--        <collection property="courses" select="org.example.mybatis3.mappers.EnrollMapper.findCoursesByStudentId"/>-->
+    </resultMap>
+    <!--  nested results : LEFT JOIN을 활용해서 한 번에 조인  -->
+    <select id="findAllStudentsWithCourses" resultMap="studentWithCoursesResultMap">
+        SELECT
+        S.id AS student_id,
+        S.name AS student_name,
+        C.id AS course_id,
+        C.name AS course_name
+        FROM STUDENTS S
+        LEFT JOIN
+        ENROLLMENTS E ON S.id = E.student_id
+        LEFT JOIN
+        COURSES C ON E.course_id = C.id
+    </select>
+    <resultMap id="courseWithStudentsResultMap" type="org.example.mybatis3.dto.CourseWithStudentsDTO">
+        <id property="id" column="course_id"/>
+        <result property="name" column="course_name"/>
+        <collection property="students" ofType="org.example.mybatis3.entity.Student">
+            <id property="id" column="student_id"/>
+            <result property="name" column="student_name"/>
+        </collection>
+    </resultMap>
+    <select id="findAllCoursesWithStudents" resultMap="courseWithStudentsResultMap">
+        SELECT
+        S.id AS student_id,
+        S.name AS student_name,
+        C.id AS course_id,
+        C.name AS course_name
+        FROM COURSES C
+        LEFT JOIN
+        ENROLLMENTS E
+        ON E.course_id = C.id
+        LEFT JOIN
+        STUDENTS S
+        ON S.id = E.student_id
+    </select>
+</mapper>
